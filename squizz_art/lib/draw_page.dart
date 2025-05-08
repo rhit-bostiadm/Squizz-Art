@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:squizz_art/draw_canvas.dart';
 import 'package:squizz_art/drawing.dart';
+import 'package:squizz_art/server.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class DrawPage extends HookWidget {
@@ -8,6 +9,9 @@ class DrawPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    Server server = Server();
+    server.setupServer();
+
     ValueNotifier<Drawing?> currDrawing = useState(null);
     ValueNotifier<List<Drawing>> drawings = useState([]);
     return Scaffold(
