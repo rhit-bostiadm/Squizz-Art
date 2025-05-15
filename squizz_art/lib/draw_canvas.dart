@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:squizz_art/drawing.dart';
 
@@ -6,8 +8,11 @@ class DrawCanvas extends StatefulWidget {
   final double width;
   final ValueNotifier<Drawing?> currDrawing;
   final ValueNotifier<List<Drawing>> drawings;
+  final ValueNotifier<Color> color;
+  final ValueNotifier<String> tool;
+  final ValueNotifier<double> size;
 
-  const DrawCanvas({super.key, required this.height, required this.width, required this.currDrawing, required this.drawings});
+  const DrawCanvas({super.key, required this.height, required this.width, required this.currDrawing, required this.drawings, required this.color, required this.tool, required this.size});
 
   @override
   State<DrawCanvas> createState() => _DrawCanvasState();
@@ -43,14 +48,27 @@ class _DrawCanvasState extends State<DrawCanvas> {
       onPointerDown: (e) {
         final render = context.findRenderObject() as RenderBox;
         final offset = render.globalToLocal(e.position);
-        widget.currDrawing.value = Drawing(points: [offset]);
+        if (widget.tool.value == "pencil") {
+          widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value);
+        }
+        if (widget.tool.value == "eraser") {
+          widget.currDrawing.value = Drawing(points: [offset], color: Theme.of(context).canvasColor, size: widget.size.value);
+        }
+        if (widget.tool.value == "squizz") {
+          widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "squizz");
+        }
       },
       onPointerMove: (e) {
         final render = context.findRenderObject() as RenderBox;
         final offset = render.globalToLocal(e.position);
         final points = List<Offset>.from(widget.currDrawing.value?.points ?? []);
         points.add(offset);
-        widget.currDrawing.value = Drawing(points: points);
+        if (widget.tool.value == "pencil") { 
+          widget.currDrawing.value = Drawing(points: points, color: widget.color.value, size: widget.size.value, tool: "pencil");
+        }
+        if (widget.tool.value == "eraser") {
+          widget.currDrawing.value = Drawing(points: points, color: Theme.of(context).canvasColor, size: widget.size.value);
+        }
       },
       onPointerUp: (e) {
         widget.drawings.value = List<Drawing>.from(widget.drawings.value);
@@ -92,7 +110,18 @@ class DrawPainter extends CustomPainter {
       paint.strokeWidth = drawing.size;
       paint.strokeCap = StrokeCap.round;
       paint.style = PaintingStyle.stroke;
-      canvas.drawPath(path, paint);
+      if (drawing.tool == "pencil") {
+        canvas.drawPath(path, paint);
+      }
+      if (drawing.tool == "squizz") {
+        ui.ParagraphBuilder pb = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: "ComicSans",fontSize: drawing.size,));
+        pb.pushStyle(ui.TextStyle(color: drawing.color));
+        pb.addText("Squizz");
+        ui.Paragraph pg = pb.build();
+        pg.layout(const ui.ParagraphConstraints(width: 1000));
+        Offset center = ui.Offset(drawing.points.first.dx-drawing.size, drawing.points.first.dy-drawing.size);
+        canvas.drawParagraph(pg, center);
+      }
     }
   }
 

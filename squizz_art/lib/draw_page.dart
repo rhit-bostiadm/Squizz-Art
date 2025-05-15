@@ -15,12 +15,15 @@ class DrawPage extends HookWidget {
 
     ValueNotifier<Drawing?> currDrawing = useState(null);
     ValueNotifier<List<Drawing>> drawings = useState([]);
+    ValueNotifier<Color> color = useState(Colors.black);
+    ValueNotifier<String> tool = useState("pencil");
+    ValueNotifier<double> size = useState(10);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
         title: const Row(
           children: [
-            Image(image: AssetImage("squizzart.png"), width: 125,),
+            Image(image: AssetImage("images/squizzart.png"), width: 125,),
           ],
         )
       ),
@@ -34,12 +37,19 @@ class DrawPage extends HookWidget {
                 width: MediaQuery.of(context).size.width,
                 currDrawing: currDrawing,
                 drawings: drawings,
+                color: color,
+                tool: tool,
+                size: size,
               );
             }
           ),
-          const Positioned(
+          Positioned(
             top: 10,
-            child: DrawToolbar(),
+            child: DrawToolbar(
+              color: color,
+              tool: tool,
+              size: size,
+            ),
           )
         ],
       ),
