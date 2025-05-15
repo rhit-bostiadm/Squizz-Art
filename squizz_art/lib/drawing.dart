@@ -26,7 +26,7 @@ class Drawing {
       points: points,
       color: Color(int.parse((json['color'] as String), radix: 16)),
       size: double.parse(json['size'].toString()),
-      tool: "pencil" // change this
+      tool: json['tool'] as String
     );
   }
 }
