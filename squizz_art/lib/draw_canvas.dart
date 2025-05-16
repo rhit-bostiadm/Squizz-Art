@@ -29,8 +29,8 @@ class _DrawCanvasState extends State<DrawCanvas> {
     'ws://137.112.216.124:8080',
     IO.OptionBuilder().setTransports(['websocket']).build(),
   ).connect();
-  final currDrawingStream = StreamController<String>();
-  final drawingsStream = StreamController<String>();
+  final currDrawingStream = StreamController<String>.broadcast();
+  final drawingsStream = StreamController<String>.broadcast();
 
   // @override
   // void initState() {
@@ -79,8 +79,7 @@ class _DrawCanvasState extends State<DrawCanvas> {
           drawingsFromJson = drawingsMap.map((json) => Drawing.fromJson(json as Map<String, dynamic>)).toList();
         }
 
-        return RepaintBoundary(
-          child: SizedBox(
+        return SizedBox(
             height: widget.height,
             width: widget.width,
             child: CustomPaint(
@@ -88,7 +87,6 @@ class _DrawCanvasState extends State<DrawCanvas> {
                 drawings: drawingsFromJson
               ),
             ),
-          ),
         );
       }
     );
@@ -122,7 +120,7 @@ class _DrawCanvasState extends State<DrawCanvas> {
             }
           },
           onPointerMove: (e) {
-            final render = context.findRenderObject() as RenderBox;
+            final render = widget.gKey.currentContext?.findRenderObject() as RenderBox;
             final offset = render.globalToLocal(e.position);
             final points = List<Offset>.from(widget.currDrawing.value?.points ?? []);
             points.add(offset);
