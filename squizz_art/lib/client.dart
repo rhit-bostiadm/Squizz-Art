@@ -59,8 +59,6 @@ class Client {
       Uri.parse('http://$ip'),
     );
 
-    print("Erm, what the squizz\n");
-
     if (response.statusCode == 200) {
       if (drawings.isEmpty) {
         return await getNewCanvas(drawings);

@@ -38,6 +38,8 @@ dependencies:
   flutter_hooks: ^0.21.2
   dart_ipify: ^1.1.1
   font_awesome_flutter: ^10.8.0
+  web_socket_channel: ^3.0.3
+  socket_io_client: ^3.1.2
 
 dev_dependencies:
   flutter_test:
