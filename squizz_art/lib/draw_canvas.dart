@@ -11,8 +11,9 @@ class DrawCanvas extends StatefulWidget {
   final ValueNotifier<Color> color;
   final ValueNotifier<String> tool;
   final ValueNotifier<double> size;
+  final GlobalKey gKey;
 
-  const DrawCanvas({super.key, required this.height, required this.width, required this.currDrawing, required this.drawings, required this.color, required this.tool, required this.size});
+  const DrawCanvas({super.key, required this.height, required this.width, required this.currDrawing, required this.drawings, required this.color, required this.tool, required this.size, required this.gKey});
 
   @override
   State<DrawCanvas> createState() => _DrawCanvasState();
@@ -21,11 +22,18 @@ class DrawCanvas extends StatefulWidget {
 class _DrawCanvasState extends State<DrawCanvas> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        buildAll(),
-        buildCurrent(context)
-      ],
+    return RepaintBoundary(
+      key: widget.gKey,
+      child: SizedBox(
+        height: widget.height,
+        width: widget.width,
+        child: Stack(
+          children: [
+            buildAll(),
+            buildCurrent(context)
+          ]
+        ),
+      )
     );
   }
 
@@ -74,14 +82,12 @@ class _DrawCanvasState extends State<DrawCanvas> {
         widget.drawings.value = List<Drawing>.from(widget.drawings.value);
         widget.drawings.value.add(widget.currDrawing.value!);
       },
-      child: RepaintBoundary(
-        child: SizedBox(
-          height: widget.height,
-          width: widget.width,
-          child: CustomPaint(
-            painter: DrawPainter(
-              drawings: widget.currDrawing.value == null ? [] : [widget.currDrawing.value!]
-            ),
+      child: SizedBox(
+        height: widget.height,
+        width: widget.width,
+        child: CustomPaint(
+          painter: DrawPainter(
+            drawings: widget.currDrawing.value == null ? [] : [widget.currDrawing.value!]
           ),
         ),
       ),
