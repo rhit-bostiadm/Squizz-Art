@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui' as ui;
-
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter/material.dart';
 import 'package:squizz_art/drawing.dart';
 
@@ -20,8 +24,34 @@ class DrawCanvas extends StatefulWidget {
 }
 
 class _DrawCanvasState extends State<DrawCanvas> {
+  // final webSocketChannel = WebSocketChannel.connect(Uri.parse("wss://echo.websocket.events"));
+  IO.Socket socket = IO.io(
+    'ws://137.112.216.124:8080',
+    IO.OptionBuilder().setTransports(['websocket']).build(),
+  ).connect();
+  final currDrawingStream = StreamController<String>();
+  final drawingsStream = StreamController<String>();
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  // }
+
+  // @override
+  // void dispose() {
+  //   // webSocketChannel.sink.close();
+  //   // socket.close();
+  //   super.dispose();
+  // }
+
   @override
   Widget build(BuildContext context) {
+    socket.onConnect((_) {
+      print('connect');
+    });
+    socket.on('currentDrawing', (data) => currDrawingStream.sink.add(data));
+    socket.on('drawings', (data) => drawingsStream.sink.add(data));
+
     return RepaintBoundary(
       key: widget.gKey,
       child: SizedBox(
@@ -38,59 +68,91 @@ class _DrawCanvasState extends State<DrawCanvas> {
   }
 
   Widget buildAll() {
-    return RepaintBoundary(
-      child: SizedBox(
-        height: widget.height,
-        width: widget.width,
-        child: CustomPaint(
-          painter: DrawPainter(
-            drawings: widget.drawings.value
+    return StreamBuilder(
+      stream: drawingsStream.stream,
+      builder: (context, snapshot) {
+        List<Drawing> drawingsFromJson = List.empty(growable: true);
+        List drawingsMap = List.empty(growable: true);
+
+        if (snapshot.hasData) {
+          drawingsMap = jsonDecode(snapshot.data!);
+          drawingsFromJson = drawingsMap.map((json) => Drawing.fromJson(json as Map<String, dynamic>)).toList();
+        }
+
+        return RepaintBoundary(
+          child: SizedBox(
+            height: widget.height,
+            width: widget.width,
+            child: CustomPaint(
+              painter: DrawPainter(
+                drawings: drawingsFromJson
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
   Widget buildCurrent(BuildContext context) {
-    return Listener(
-      onPointerDown: (e) {
-        final render = context.findRenderObject() as RenderBox;
-        final offset = render.globalToLocal(e.position);
-        if (widget.tool.value == "pencil") {
-          widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value);
+    return StreamBuilder(
+      stream: currDrawingStream.stream, 
+      builder: (context, snapshot) {
+        Drawing? drawing;
+        Map<String, dynamic>? drawingMap;
+        if (snapshot.hasData) {
+          drawingMap = jsonDecode(snapshot.data!);
         }
-        if (widget.tool.value == "eraser") {
-          widget.currDrawing.value = Drawing(points: [offset], color: Theme.of(context).canvasColor, size: widget.size.value);
+        if (drawingMap != null) {
+          drawing = Drawing.fromJson(drawingMap);
         }
-        if (widget.tool.value == "squizz") {
-          widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "squizz");
-        }
-      },
-      onPointerMove: (e) {
-        final render = context.findRenderObject() as RenderBox;
-        final offset = render.globalToLocal(e.position);
-        final points = List<Offset>.from(widget.currDrawing.value?.points ?? []);
-        points.add(offset);
-        if (widget.tool.value == "pencil") { 
-          widget.currDrawing.value = Drawing(points: points, color: widget.color.value, size: widget.size.value, tool: "pencil");
-        }
-        if (widget.tool.value == "eraser") {
-          widget.currDrawing.value = Drawing(points: points, color: Theme.of(context).canvasColor, size: widget.size.value);
-        }
-      },
-      onPointerUp: (e) {
-        widget.drawings.value = List<Drawing>.from(widget.drawings.value);
-        widget.drawings.value.add(widget.currDrawing.value!);
-      },
-      child: SizedBox(
-        height: widget.height,
-        width: widget.width,
-        child: CustomPaint(
-          painter: DrawPainter(
-            drawings: widget.currDrawing.value == null ? [] : [widget.currDrawing.value!]
+
+        return Listener(
+          onPointerDown: (e) {
+            final render = context.findRenderObject() as RenderBox;
+            final offset = render.globalToLocal(e.position);
+            if (widget.tool.value == "pencil") {
+              widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value);
+            }
+            if (widget.tool.value == "eraser") {
+              widget.currDrawing.value = Drawing(points: [offset], color: Theme.of(context).canvasColor, size: widget.size.value);
+            }
+            if (widget.tool.value == "squizz") {
+              widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "squizz");
+            }
+          },
+          onPointerMove: (e) {
+            final render = context.findRenderObject() as RenderBox;
+            final offset = render.globalToLocal(e.position);
+            final points = List<Offset>.from(widget.currDrawing.value?.points ?? []);
+            points.add(offset);
+            if (widget.tool.value == "pencil") { 
+              widget.currDrawing.value = Drawing(points: points, color: widget.color.value, size: widget.size.value, tool: "pencil");
+            }
+            if (widget.tool.value == "eraser") {
+              widget.currDrawing.value = Drawing(points: points, color: Theme.of(context).canvasColor, size: widget.size.value);
+            }
+
+            // currDrawingStream.sink.add(jsonEncode(widget.currDrawing.value?.toJson()));
+            socket.emit('currentSketch', jsonEncode(widget.currDrawing.value?.toJson()));
+          },
+          onPointerUp: (e) {
+            widget.drawings.value = List<Drawing>.from(widget.drawings.value);
+            widget.drawings.value.add(widget.currDrawing.value!);
+            // webSocketChannel.sink.add(drawingsStream.sink.add(jsonEncode(widget.drawings.value)));
+            socket.emit('drawings', jsonEncode(widget.drawings.value));
+          },
+              child: SizedBox(
+            height: widget.height,
+            width: widget.width,
+            child: CustomPaint(
+              painter: DrawPainter(
+                drawings: drawing == null ? [] : [drawing]
+                  ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 }
