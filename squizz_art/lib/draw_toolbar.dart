@@ -121,10 +121,7 @@ class _DrawToolbarState extends State<DrawToolbar> {
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
-                              setState(() {
-                                widget.canvas.drawings.value = [];
-                                widget.canvas.currDrawing.value = null;
-                              });
+                              widget.canvas.socket.emit('delete');
                             },
                             child: const Text("Delete")
                           )
