@@ -19,7 +19,6 @@ async function setupServer() {
 
   io.on("connection", function (socket) {
     console.log("User connected");
-    io.emit('connected');
 
     socket.on('drawings', function (data) {
       io.emit('drawings', `${data}`)
@@ -31,6 +30,10 @@ async function setupServer() {
 
     socket.on('allDrawings', function (data) {
       io.emit('allDrawings', `${data}`)
+    });
+
+    socket.on('connected', function (data) {
+      io.emit('connected', `${data}`)
     });
 
     socket.on('disconnect', function () {

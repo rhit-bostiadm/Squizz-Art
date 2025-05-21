@@ -62,10 +62,13 @@ class _DrawCanvasState extends State<DrawCanvas> {
       widget.allCurrentDrawings.value = [];
     });
     widget.socket.on('connected', (data) {
-      widget.socket.emit('allDrawings', jsonEncode(widget.drawings.value));
+      if (widget.drawings.value.isNotEmpty) {
+        widget.socket.emit('allDrawings', jsonEncode(widget.drawings.value));
+      }
     });
 
     widget.socket.onConnect((_) {
+      retrievedInitialData = false;
       widget.socket.emit('connected');
     });
 
