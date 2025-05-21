@@ -153,6 +153,12 @@ class _DrawCanvasState extends State<DrawCanvas> {
             if (widget.tool.value == "squizz") {
               widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "squizz");
             }
+            if (widget.tool.value == "rectangle") {
+              widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "rectangle");
+            }
+            if (widget.tool.value == "circle") {
+              widget.currDrawing.value = Drawing(points: [offset], color: widget.color.value, size: widget.size.value, tool: "circle");
+            }
           },
           onPointerMove: (e) {
             final render = widget.gKey.currentContext?.findRenderObject() as RenderBox;
@@ -166,7 +172,12 @@ class _DrawCanvasState extends State<DrawCanvas> {
             if (widget.tool.value == "eraser") {
               widget.currDrawing.value = Drawing(points: points, color: Theme.of(context).canvasColor, size: widget.size.value);
             }
-
+            if (widget.tool.value == "rectangle") {
+              widget.currDrawing.value = Drawing(points: points, color: widget.color.value, size: widget.size.value, tool: "rectangle");
+            }
+            if (widget.tool.value == "circle") {
+              widget.currDrawing.value = Drawing(points: points, color: widget.color.value, size: widget.size.value, tool: "circle");
+            }
             // widget.allCurrentDrawings.value.add(widget.currDrawing.value!);
             // localCurrentDrawings.add(widget.currDrawing.value!);
 
@@ -248,6 +259,14 @@ class DrawPainter extends CustomPainter {
         pg.layout(const ui.ParagraphConstraints(width: 1000));
         Offset center = ui.Offset(drawing.points.first.dx-drawing.size, drawing.points.first.dy-drawing.size);
         canvas.drawParagraph(pg, center);
+      }
+      if (drawing.tool == "circle") {
+        Rect rect = Rect.fromPoints(points.first, points.last);
+        canvas.drawOval(rect, paint);
+      }
+      if (drawing.tool == "rectangle") {
+        Rect rect = Rect.fromPoints(points.first, points.last);
+        canvas.drawRect(rect, paint);
       }
     }
   }

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -26,129 +27,173 @@ class DrawToolbar extends StatefulHookWidget {
 class _DrawToolbarState extends State<DrawToolbar> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 300,
-      height: 450,
-      decoration: const BoxDecoration(
-        color: Color.fromRGBO(255, 255, 255, 50),
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(10)),
-      ),
-      child: Column(
-        children: [
-          const Text("Tools",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
-          const Padding(padding: EdgeInsets.all(5)),
-          Wrap(
-            spacing: 5,
+    return ExpandableNotifier(
+      child: Expandable(
+        // header: Container(
+        //   width: 300,
+        //   height: 50,
+        //   decoration: const BoxDecoration(
+        //     color: Color.fromRGBO(255, 255, 255, 50),
+        //     borderRadius: BorderRadius.horizontal(right: Radius.circular(10)),
+        //   ),
+        //   child: const Center(child: Text("Tools",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)))
+        // ),
+        collapsed: ExpandableButton(
+          child: Container(
+            width: 300,
+            height: 30,
+            decoration: const BoxDecoration(
+              color: Color.fromRGBO(255, 255, 255, 50),
+              borderRadius: BorderRadius.horizontal(left: Radius.circular(10), right: Radius.circular(10)),
+            ),
+            child: const Center(child: Wrap(children: [Icon(Icons.arrow_drop_down), Text("Tools",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20))]))
+          ),
+        ),
+        expanded: Container(
+          width: 300,
+          height: 450,
+          decoration: const BoxDecoration(
+            color: Color.fromRGBO(255, 255, 255, 50),
+            borderRadius: BorderRadius.horizontal(left: Radius.circular(10), right: Radius.circular(10)),
+          ),
+          child: Column(
             children: [
-              ToolIcon(
-                iconData: Icons.edit,
-                active: widget.tool.value == "pencil",
-                onTap: () => widget.tool.value = "pencil"
+              ExpandableButton(
+                child: Container(
+                  width: 300,
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(255, 255, 255, 0),
+                    borderRadius: BorderRadius.horizontal(left: Radius.circular(10), right: Radius.circular(10)),
+                  ),
+                  child: const Center(child: Wrap(children: [Icon(Icons.arrow_drop_up), Text("Tools",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20))]))
+                ),
               ),
-              ToolIcon(
-                iconData: FontAwesomeIcons.eraser,
-                active: widget.tool.value == "eraser",
-                onTap: () => widget.tool.value = "eraser"
-              ),
-              ToolIcon(
-                squizz: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Squizz",
-                    style: TextStyle(
-                      color: widget.tool.value == "squizz" ? Colors.blue : Colors.grey,
-                      fontFamily: "ComicSans",
-                      fontSize: 10,
+              const Padding(padding: EdgeInsets.all(5)),
+              Wrap(
+                spacing: 5,
+                children: [
+                  ToolIcon(
+                    iconData: Icons.edit,
+                    active: widget.tool.value == "pencil",
+                    onTap: () => widget.tool.value = "pencil"
+                  ),
+                  ToolIcon(
+                    iconData: FontAwesomeIcons.eraser,
+                    active: widget.tool.value == "eraser",
+                    onTap: () => widget.tool.value = "eraser"
+                  ),
+                  ToolIcon(
+                    squizz: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Squizz",
+                        style: TextStyle(
+                          color: widget.tool.value == "squizz" ? Colors.blue : Colors.grey,
+                          fontFamily: "ComicSans",
+                          fontSize: 10,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
                     ),
-                    textAlign: TextAlign.center,
-                  )
-                ),
-                active: widget.tool.value == "squizz",
-                onTap: () => widget.tool.value = "squizz",
-              )
-            ],
-          ),
-          const Divider(),
-          const Text("Color",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
-          const Padding(padding: EdgeInsets.all(5)),
-          ColorSelector(color: widget.color),
-          const Divider(),
-          const Text("Brush/Eraser Size",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
-          const Padding(padding: EdgeInsets.all(5)),
-          Slider(
-            value: widget.size.value,
-            min: 1,
-            max: 100,
-            onChanged: (s) {widget.size.value = s;}
-          ),
-          const Divider(),
-          const Text("Options",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
-          const Padding(padding: EdgeInsets.all(5)),
-          Wrap(
-            spacing: 5,
-            children: [
-              GestureDetector(
-                onTap: () => saveFile(),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 3
-                    )
+                    active: widget.tool.value == "squizz",
+                    onTap: () => widget.tool.value = "squizz",
                   ),
-                  child: const Icon(
-                    Icons.save,
-                    color: Colors.blue,
-                    size: 25,
+                  ToolIcon(
+                    iconData: FontAwesomeIcons.square,
+                    active: widget.tool.value == "rectangle",
+                    onTap: () => widget.tool.value = "rectangle"
+                  ),
+                  ToolIcon(
+                    iconData: FontAwesomeIcons.circle,
+                    active: widget.tool.value == "circle",
+                    onTap: () => widget.tool.value = "circle"
                   )
-                ),
+                ],
               ),
-              GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text("Delete drawing?"),
-                        content: const Text("Are you sure you want to discard this drawing?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text("Cancel")
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              widget.canvas.socket.emit('delete');
-                            },
-                            child: const Text("Delete")
-                          )
-                        ],
+              const Divider(),
+              const Text("Color",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
+              const Padding(padding: EdgeInsets.all(5)),
+              ColorSelector(color: widget.color),
+              const Divider(),
+              const Text("Tool Size",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
+              const Padding(padding: EdgeInsets.all(5)),
+              Slider(
+                value: widget.size.value,
+                min: 1,
+                max: 100,
+                onChanged: (s) {widget.size.value = s;}
+              ),
+              const Divider(),
+              const Text("Options",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)),
+              const Padding(padding: EdgeInsets.all(5)),
+              Wrap(
+                spacing: 5,
+                children: [
+                  GestureDetector(
+                    onTap: () => saveFile(),
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 3
+                        )
+                      ),
+                      child: const Icon(
+                        Icons.save,
+                        color: Colors.blue,
+                        size: 25,
+                      )
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text("Delete drawing?"),
+                            content: const Text("Are you sure you want to discard this drawing?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text("Cancel")
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  widget.canvas.socket.emit('delete');
+                                },
+                                child: const Text("Delete")
+                              )
+                            ],
+                          );
+                        }
                       );
-                    }
-                  );
-                },
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.red,
-                      width: 3
-                    )
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.red,
+                          width: 3
+                        )
+                      ),
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 25,
+                      )
+                    ),
                   ),
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.red,
-                    size: 25,
-                  )
-                ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
