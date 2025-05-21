@@ -28,7 +28,7 @@ class DrawPage extends HookWidget {
                 size: size,
                 gKey: gKey,
                 socket: IO.io(
-                          'ws://137.112.217.87:8080',
+                          'ws://137.112.217.79:8080',
                           IO.OptionBuilder().setTransports(['websocket']).build(),
                         ).connect(),
               );

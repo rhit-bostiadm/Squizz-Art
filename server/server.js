@@ -21,10 +21,6 @@ async function setupServer() {
     console.log("User connected");
     io.emit('connected');
 
-    socket.on('currentDrawing', function (data) {
-      io.emit('currentDrawing', `${data}`)
-    });
-
     socket.on('drawings', function (data) {
       io.emit('drawings', `${data}`)
     });
@@ -35,10 +31,6 @@ async function setupServer() {
 
     socket.on('allDrawings', function (data) {
       io.emit('allDrawings', `${data}`)
-    });
-
-    socket.on('allCurrentDrawings', function (data) {
-      io.emit('allCurrentDrawings', `${data}`)
     });
 
     socket.on('disconnect', function () {

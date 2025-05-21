@@ -29,15 +29,6 @@ class _DrawToolbarState extends State<DrawToolbar> {
   Widget build(BuildContext context) {
     return ExpandableNotifier(
       child: Expandable(
-        // header: Container(
-        //   width: 300,
-        //   height: 50,
-        //   decoration: const BoxDecoration(
-        //     color: Color.fromRGBO(255, 255, 255, 50),
-        //     borderRadius: BorderRadius.horizontal(right: Radius.circular(10)),
-        //   ),
-        //   child: const Center(child: Text("Tools",style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'ComicSans',fontSize: 20)))
-        // ),
         collapsed: ExpandableButton(
           child: Container(
             width: 300,
